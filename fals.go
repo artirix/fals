@@ -37,12 +37,12 @@ func main() {
 	configuration := Configuration{}
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("Error reading config.json:", err)
 	}
 
 	// start Filewatchers for the files
 	for _, comp := range configuration.Components {
-		fmt.Println("watching", comp.Name, comp.File)
+		fmt.Println("Watching", comp.Name, "at", comp.File)
 		go Filewatcher(comp, configuration, outgoing)
 	}
 
@@ -61,8 +61,6 @@ func main() {
 				if item == nil {
 					break
 				}
-
-				fmt.Println("shipping item:", item)
 				items = append(items, item.(*Message))
 			}
 
@@ -76,13 +74,9 @@ func main() {
 			req, _ := http.NewRequest("POST", configuration.Api_endpoint, data)
 			req.Header.Set("x-api-key", configuration.Api_key)
 
-			fmt.Println("sending request of", outlen, "items")
-			resp, err := client.Do(req)
+			_, err := client.Do(req)
 			if err != nil {
 				fmt.Println("error requesting:", err)
-			} else {
-				fmt.Println(req)
-				fmt.Println(resp)
 			}
 		}
 		time.Sleep(time.Duration(configuration.Shipping_interval) * time.Second)
