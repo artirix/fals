@@ -5,21 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ActiveState/tail"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/firehose"
 	"github.com/foize/go.fifo"
 	"os"
 	"time"
-	"github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/aws/credentials"
-    "github.com/aws/aws-sdk-go/service/firehose"
 )
 
 type Configuration struct {
-	Api_endpoint, Api_key, Project, Env string
+	Api_endpoint, Api_key, Project, Env        string
 	Aws_region, Aws_access_key, Aws_secret_key string
-	Firehose_stream_name string
-	Shipping_interval                   int
-	Components                          []Component
+	Firehose_stream_name                       string
+	Shipping_interval                          int
+	Components                                 []Component
 }
 
 type Component struct {
@@ -97,8 +97,7 @@ func main() {
 				// Message from an error.
 				fmt.Println(err.Error())
 				return
-			} else
-			{
+			} else {
 				fmt.Println(resp)
 			}
 		}
