@@ -52,8 +52,10 @@ func main() {
 		if outlen > 0 {
 			// create a request body
 			var data = bytes.NewBuffer([]byte(``))
+			encoder := json.NewEncoder(data)
 
 			// add queue contents as payload
+			var items []*Message
 			for {
 				item := outgoing.Next()
 				if item == nil {
@@ -61,7 +63,13 @@ func main() {
 				}
 
 				fmt.Println("shipping item:", item)
+				items = append(items, item.(*Message))
+			}
 
+			error := encoder.Encode(items)
+			if error != nil {
+				fmt.Println("Encoding error:", error)
+				//TODO: Error handling? Abort run?
 			}
 
 			// send request
