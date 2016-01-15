@@ -68,26 +68,25 @@ func main() {
 			encoder := json.NewEncoder(data)
 
 			// add queue contents as payload
-			var items []*Message
 			for {
 				item := outgoing.Next()
 				if item == nil {
 					break
 				}
-				items = append(items, item.(*Message))
-			}
 
-			// encode json and send request
-			buf, err := json.Marshal(items)
-			if err != nil {
-				fmt.Println("Encoding error:", error)
-				continue
+				error := encoder.Encode(item)
+
+				if error != nil {
+					fmt.Println("Encoding error: ", error)
+				}
+
 			}
+			fmt.Println("Buf", data.String())
 
 			params := &firehose.PutRecordInput{
 				DeliveryStreamName: aws.String(configuration.Firehose_stream_name), // Required
 				Record: &firehose.Record{ // Required
-					Data: buf, // Required
+					Data: data.Bytes(), // Required
 				},
 			}
 			resp, err := svc.PutRecord(params)
