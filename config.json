@@ -1,0 +1,17 @@
+{
+    "api_endpoint": "",
+    "api_key": "",
+    "project": "fals",
+    "env": "int",
+    "shipping_interval": 1,
+    "components": [
+        {
+            "name": "syslog",
+            "file": "/Users/mjuuso/file2.txt"
+        },
+        {
+            "name": "random log",
+            "file": "/Users/mjuuso/file.txt"
+        }
+    ]
+}
