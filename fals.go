@@ -67,7 +67,7 @@ func main() {
 			error := encoder.Encode(items)
 			if error != nil {
 				fmt.Println("Encoding error:", error)
-				//TODO: Error handling? Abort run?
+				continue
 			}
 
 			// send request
