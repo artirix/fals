@@ -1,6 +1,8 @@
 {
-    "api_endpoint": "",
-    "api_key": "",
+    "aws_region": "eu-west-1",
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "firehose_stream_name": "",
     "project": "fals",
     "env": "int",
     "shipping_interval": 1,

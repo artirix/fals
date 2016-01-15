@@ -5,16 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ActiveState/tail"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/firehose"
 	"github.com/foize/go.fifo"
-	"net/http"
 	"os"
 	"time"
 )
 
 type Configuration struct {
-	Api_endpoint, Api_key, Project, Env string
-	Shipping_interval                   int
-	Components                          []Component
+	Api_endpoint, Api_key, Project, Env        string
+	Aws_region, Aws_access_key, Aws_secret_key string
+	Firehose_stream_name                       string
+	Shipping_interval                          int
+	Components                                 []Component
 }
 
 type Component struct {
@@ -27,10 +32,6 @@ type Message struct {
 }
 
 func main() {
-	// declare our outgoing queue and http client
-	outgoing := fifo.NewQueue()
-	client := &http.Client{}
-
 	// load the configuration
 	file, _ := os.Open("config.json")
 	decoder := json.NewDecoder(file)
@@ -39,6 +40,18 @@ func main() {
 	if err != nil {
 		fmt.Println("Error reading config.json:", err)
 	}
+
+	// declare our outgoing queue
+	outgoing := fifo.NewQueue()
+
+	// initialize aws sdk and credentials from configuration
+	svc := firehose.New(session.New(), &aws.Config{Region: aws.String(configuration.Aws_region),
+		Credentials: credentials.NewStaticCredentials(configuration.Aws_access_key, configuration.Aws_secret_key, "")})
+	fmt.Println("region", configuration.Aws_region)
+	fmt.Println(svc)
+	streams, err := svc.ListDeliveryStreams(&firehose.ListDeliveryStreamsInput{})
+	fmt.Println(streams)
+	fmt.Println(err)
 
 	// start Filewatchers for the files
 	for _, comp := range configuration.Components {
@@ -64,19 +77,28 @@ func main() {
 				items = append(items, item.(*Message))
 			}
 
-			error := encoder.Encode(items)
-			if error != nil {
+			// encode json and send request
+			buf, err := json.Marshal(items)
+			if err != nil {
 				fmt.Println("Encoding error:", error)
 				continue
 			}
 
-			// send request
-			req, _ := http.NewRequest("POST", configuration.Api_endpoint, data)
-			req.Header.Set("x-api-key", configuration.Api_key)
+			params := &firehose.PutRecordInput{
+				DeliveryStreamName: aws.String(configuration.Firehose_stream_name), // Required
+				Record: &firehose.Record{ // Required
+					Data: buf, // Required
+				},
+			}
+			resp, err := svc.PutRecord(params)
 
-			_, err := client.Do(req)
 			if err != nil {
-				fmt.Println("error requesting:", err)
+				// Print the error, cast err to awserr.Error to get the Code and
+				// Message from an error.
+				fmt.Println(err.Error())
+				return
+			} else {
+				fmt.Println(resp)
 			}
 		}
 		time.Sleep(time.Duration(configuration.Shipping_interval) * time.Second)
