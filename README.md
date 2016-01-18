@@ -1,25 +1,20 @@
 # Format-Agnostic Log Shipper
 
-The application tails specified logs and POSTs any additions to an API.
+The application tails specified logs and ships any additions to an Amazon Kinesis Firehose delivery stream.
 
-## POST payload
-The POST request body is a list of one or more objects, with the following specification:
+## Firehose record payload
+The created Firehose record is a list of one or more objects separated with newlines, with the following specification:
 
 ```
-[
-  {
-    "Project":    string,
-    "Env":        string,
-    "Component":  string,
-    "Text":       string,
-    "Timestamp":  int64
-  }, ...
-]
+{"Project": string, "Env": string, "Component": string, "Text": string, "Timestamp": int64}
 ```
 
 ## Configuration: config.json
-* api_endpoint: HTTP(S) URL to the API endpoint we're going to POST the updates
-* api_key: included as a header x-api-key in the POST request
+* aws_region: The region of the Kinesis Firehose delivery stream
+* aws_access_key: AWS access key with an attached policy allowing PutRecord on the Firehose stream
+* aws_secret_key: AWS secret key
+* firehose_stream_name: The Kinesis Firehose delivery stream name
+* firehose_record_size: The maximum record size to send to Kinesis Firehose (currently limited to 1024KB by AWS)
 * project: included as Project value in every posted JSON object
 * env: included as Env value in every posted JSON object
 * shipping_interval: interval to POST requests, in seconds
