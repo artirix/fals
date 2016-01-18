@@ -14,7 +14,6 @@ The created Firehose record is a list of one or more objects separated with newl
 * aws_access_key: AWS access key with an attached policy allowing PutRecord on the Firehose stream
 * aws_secret_key: AWS secret key
 * firehose_stream_name: The Kinesis Firehose delivery stream name
-* firehose_record_size: The maximum record size to send to Kinesis Firehose (currently limited to 1024KB by AWS)
 * project: included as Project value in every posted JSON object
 * env: included as Env value in every posted JSON object
 * shipping_interval: interval to POST requests, in seconds

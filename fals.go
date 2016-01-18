@@ -18,7 +18,7 @@ type Configuration struct {
 	Api_endpoint, Api_key, Project, Env        string
 	Aws_region, Aws_access_key, Aws_secret_key string
 	Firehose_stream_name                       string
-	Shipping_interval, Firehose_record_size    int
+	Shipping_interval                          int
 	Components                                 []Component
 }
 
@@ -83,7 +83,8 @@ func main() {
 					break
 				}
 
-				if (bytes.NewBuffer(json_value).Len() + data.Len()) > configuration.Firehose_record_size {
+				// AWS currently limits Kinesis Firehose records to 1024KB
+				if (bytes.NewBuffer(json_value).Len() + data.Len()) > 1024000 {
 					// record size would be exceeded
 					break
 				}

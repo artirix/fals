@@ -3,7 +3,6 @@
     "aws_access_key": "",
     "aws_secret_key": "",
     "firehose_stream_name": "",
-    "firehose_record_size": 1024000,
     "project": "fals",
     "env": "int",
     "shipping_interval": 1,
